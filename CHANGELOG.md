@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.6.0.45] - 2025-02-21 (Beta)
+
+- [Fix] No longer close the box and prevent the cursor being sent far for no reason after a after a completed play
+
+## [0.6.0.44] - 2025-02-21 (Beta)
+
+- Refactor CTJA & fix minor parsing issues
+
+## [0.6.0.43] - 2025-02-20 (Beta)
+
+- [Fix] Make 0 stars charts selectable on song select
+
+## [0.6.0.42] - 2025-02-20 (Beta)
+
+- Fix wrong notes' scrolling BPM when `#BPMCHANGE` is put at chart start due to wrong post-process order of 0x03 (initial BPM:) and 0x08 (#BPMCHANGE)
+- Fix(CTja): only add initial-state chips once at `#START` to handle respecified/omitted/out-of-order headers
+- Fix inaccurate time of chip 0x55 (#BGAOFF) time by stop reassigning chips' time by measure position during TJA post-process, excepts for 0xDD (#SECTION)
+- Fix chip 0xDD (#SECTION) had unstable sorting order & inaccurate time by modifying assigned fields and stop reassigning chips' time by measure position during TJA post-process
+- Fix: prevent music play failure when music (0x01) is the first chip due to wrong mixer-adding time calculated in CTja.t発声時刻msと発声位置を取得する() [tGetSoundTimeMsAndSoundPosition]
+- Fix wrong chip time of invisible channels 0x02 (measure length), 0x03 (initial BPM), & 0x08 (internal BPM change)
+- (Enhancement) Increase interpreted MusicPreTimeMs by 1.5 seconds from Config.ini
+- Fix: ensure correct training mode measure count by setting CChip.bHit to true if and only if counted
+- Feat: apply MusicPreTimeMs properly to gameplay retry & training mode resume
+- Fix broken multiplayer Kusudama-to-Balloon conversion & training mode go-go marks due to inconsistent usage of n発声時刻ms vs. db発声時刻ms
+- Fix training mode progress bars could exceed the frame
+- Fix MOVIEOFFSET: not applied if negative, applied twice if positive, & wrongly applied to #BGAON
+
+## [0.6.0.41] - 2025-02-08 (Beta)
+
+- [Fix] SongPlaybackSpeed misused to initialize speed-independent animation values
+- [Fix] entering training mode in non-1x play speed distorted displayed go-go time position
+- [Fix] GetNowPBMTime() (notes' and bar lines' position variable in HB/BMScroll) returned wrong beat position for charts with positive OFFSET
+- [Fix] ScriptBG Lua API gave wrong timestamp for charts with positive OFFSET:
+- [Fix] global offset bug completely by moving OFFSET handling to #START, including:
+=> Fix global offset was treated as positive when OFFSET: is not given in TJA
+=> Fix wrong HB/BMScroll position before the initial measure when OFFSET: is not given in TJA or is given before BPM:
+- [Fix] TJA+global offset wrongly re-applied on each dan song
+- [Fix] Mini-Taiko input highlight fade-out animation speed varied by play speed
+- [Fix] make initial song playback buffer play-speed-independent for regular charts
+- [Fix] music silenced when resumed from x+% of the song at x% song speed
+- [Chore] remove static extra (2 / PlaySpeed)-second delay beyond the song playback buffer
+- [Chore] remove redundant initial song playback buffer for Dans
+=> Save 3 seconds for retrying a Dan!
+
 ## [0.6.0.40] - 2025-01-31 (Beta)
 
 - Force all kusudamas to regular balloon in training mode
