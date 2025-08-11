@@ -23,7 +23,7 @@ internal class CActImplLaneTaiko : CActivity {
 			this.stBranch[i].nBranch文字透明度 = 0;
 			this.stBranch[i].nY座標 = 0;
 
-			this.n総移動時間[i] = -1;
+			this.ResetPlayStates();
 		}
 		this.ctゴーゴー = new CCounter();
 
@@ -494,7 +494,7 @@ internal class CActImplLaneTaiko : CActivity {
 		if (OpenTaiko.ConfigIni.nPlayerCount <= 2) {
 			if (OpenTaiko.Tx.Lane_Background_Sub != null) {
 				OpenTaiko.Tx.Lane_Background_Sub.t2D描画(OpenTaiko.Skin.Game_Lane_Sub_X[0], OpenTaiko.Skin.Game_Lane_Sub_Y[0]);
-				if (OpenTaiko.stageGameScreen.bDoublePlay) {
+				if (OpenTaiko.stageGameScreen.isMultiPlay) {
 					OpenTaiko.Tx.Lane_Background_Sub.t2D描画(OpenTaiko.Skin.Game_Lane_Sub_X[1], OpenTaiko.Skin.Game_Lane_Sub_Y[1]);
 				}
 			}
@@ -583,31 +583,27 @@ internal class CActImplLaneTaiko : CActivity {
 		}
 
 		for (int i = 0; i < OpenTaiko.ConfigIni.nPlayerCount; i++) {
-			var nTime = (long)OpenTaiko.GetTJA(i)!.GameTimeToTjaTime(SoundManager.PlayTimer.NowTimeMs);
-			if (this.n総移動時間[i] != -1) {
-				if (n移動方向[i] == 1) {
-					OpenTaiko.stageGameScreen.JPOSCROLLX[i] = this.n移動開始X[i] + (int)((((int)nTime - this.n移動開始時刻[i]) / (double)(this.n総移動時間[i])) * this.n移動距離px[i]);
-					OpenTaiko.stageGameScreen.JPOSCROLLY[i] = this.n移動開始Y[i] + (int)((((int)nTime - this.n移動開始時刻[i]) / (double)(this.n総移動時間[i])) * this.nVerticalJSPos[i]);
-					//TJAPlayer3.stage演奏ドラム画面.FlyingNotes.StartPointX[i] = this.n移動開始X[i] + (int)((((int)nTime - this.n移動開始時刻[i]) / (double)(this.n総移動時間[i])) * this.n移動距離px[i]);
-				} else {
-					OpenTaiko.stageGameScreen.JPOSCROLLX[i] = this.n移動開始X[i] - (int)((((int)nTime - this.n移動開始時刻[i]) / (double)(this.n総移動時間[i])) * this.n移動距離px[i]);
-					OpenTaiko.stageGameScreen.JPOSCROLLY[i] = this.n移動開始Y[i] - (int)((((int)nTime - this.n移動開始時刻[i]) / (double)(this.n総移動時間[i])) * this.nVerticalJSPos[i]);
-					//TJAPlayer3.stage演奏ドラム画面.FlyingNotes.StartPointX[i] = this.n移動開始X[i] - (int)((((int)nTime - this.n移動開始時刻[i]) / (double)(this.n総移動時間[i])) * this.n移動距離px[i]);
-				}
-
-				if (((int)nTime) > this.n移動開始時刻[i] + this.n総移動時間[i]) {
-					this.n総移動時間[i] = -1;
-					OpenTaiko.stageGameScreen.JPOSCROLLX[i] = this.n移動目的場所X[i];
-					OpenTaiko.stageGameScreen.JPOSCROLLY[i] = this.n移動目的場所Y[i];
-					//TJAPlayer3.stage演奏ドラム画面.FlyingNotes.StartPointX[i] = this.n移動目的場所X[i];
-				}
+			if (this.n総移動時間[i] == -1) {
+				continue;
+			}
+			var nTime = (int)(long)OpenTaiko.GetTJA(i)!.GameTimeToTjaTime(SoundManager.PlayTimer.NowTimeMs);
+			if (nTime < this.n移動開始時刻[i]) { // in case of rewinding
+				OpenTaiko.stageGameScreen.JPOSCROLLX[i] = this.n移動開始X[i];
+				OpenTaiko.stageGameScreen.JPOSCROLLY[i] = this.n移動開始Y[i];
+			} else if (nTime < this.n移動開始時刻[i] + this.n総移動時間[i]) {
+				OpenTaiko.stageGameScreen.JPOSCROLLX[i] = this.n移動開始X[i] + (((nTime - this.n移動開始時刻[i]) / (double)this.n総移動時間[i]) * this.n移動距離px[i]);
+				OpenTaiko.stageGameScreen.JPOSCROLLY[i] = this.n移動開始Y[i] + (((nTime - this.n移動開始時刻[i]) / (double)this.n総移動時間[i]) * this.nVerticalJSPos[i]);
+			} else {
+				this.n総移動時間[i] = -1;
+				OpenTaiko.stageGameScreen.JPOSCROLLX[i] = this.n移動目的場所X[i];
+				OpenTaiko.stageGameScreen.JPOSCROLLY[i] = this.n移動目的場所Y[i];
 			}
 		}
 
 
 
 
-		if (OpenTaiko.ConfigIni.bEnableAVI && OpenTaiko.TJA.listVD.Count > 0 && OpenTaiko.stageGameScreen.ShowVideo) {
+		if (OpenTaiko.ConfigIni.bEnableAVI && OpenTaiko.TJA.listVD.Count > 0 && OpenTaiko.stageGameScreen.ShowVideo && !OpenTaiko.ConfigIni.bTokkunMode) {
 			if (OpenTaiko.Tx.Lane_Background_Main != null) OpenTaiko.Tx.Lane_Background_Main.Opacity = OpenTaiko.ConfigIni.nBGAlpha;
 			if (OpenTaiko.Tx.Lane_Background_AI != null) OpenTaiko.Tx.Lane_Background_AI.Opacity = OpenTaiko.ConfigIni.nBGAlpha;
 			if (OpenTaiko.Tx.Lane_Background_Sub != null) OpenTaiko.Tx.Lane_Background_Sub.Opacity = OpenTaiko.ConfigIni.nBGAlpha;
@@ -622,14 +618,20 @@ internal class CActImplLaneTaiko : CActivity {
 		return base.Draw();
 	}
 
+	public void ResetPlayStates() {
+		for (int i = 0; i < 5; ++i) {
+			this.n総移動時間[i] = -1;
+		}
+	}
+
 	public void ゴーゴー炎() {
 		//判定枠
 		if (OpenTaiko.Tx.Judge_Frame != null) {
 			OpenTaiko.Tx.Judge_Frame.b加算合成 = OpenTaiko.Skin.Game_JudgeFrame_AddBlend;
 			for (int i = 0; i < OpenTaiko.ConfigIni.nPlayerCount; i++) {
 				OpenTaiko.Tx.Judge_Frame.t2D描画(
-					OpenTaiko.stageGameScreen.NoteOriginX[i],
-					OpenTaiko.stageGameScreen.NoteOriginY[i], new Rectangle(0, 0, OpenTaiko.Skin.Game_Notes_Size[0], OpenTaiko.Skin.Game_Notes_Size[1]));
+					OpenTaiko.stageGameScreen.GetNoteOriginX(i),
+					OpenTaiko.stageGameScreen.GetNoteOriginY(i), new Rectangle(0, 0, OpenTaiko.Skin.Game_Notes_Size[0], OpenTaiko.Skin.Game_Notes_Size[1]));
 			}
 		}
 
@@ -671,6 +673,9 @@ internal class CActImplLaneTaiko : CActivity {
 						x += OpenTaiko.Skin.Game_Effect_Fire_X[i];
 						y += OpenTaiko.Skin.Game_Effect_Fire_Y[i];
 					}
+
+					x += OpenTaiko.stageGameScreen.GetJPOSCROLLX(i);
+					y += OpenTaiko.stageGameScreen.GetJPOSCROLLY(i);
 
 					OpenTaiko.Tx.Effects_Fire.vcScaleRatio.X = f倍率;
 					OpenTaiko.Tx.Effects_Fire.vcScaleRatio.Y = f倍率;
@@ -790,22 +795,15 @@ internal class CActImplLaneTaiko : CActivity {
 		OpenTaiko.stageGameScreen.actLane.t分岐レイヤー_コース変化(n現在, n次回, nPlayer);
 	}
 
-	public void t判定枠移動(double db移動時間, int n移動px, int n移動方向, int nPlayer, int vJs) {
-		CTja tja = OpenTaiko.GetTJA(nPlayer)!;
-		this.n移動開始時刻[nPlayer] = (int)tja.GameTimeToTjaTime(SoundManager.PlayTimer.NowTimeMs);
-		this.n移動開始X[nPlayer] = OpenTaiko.stageGameScreen.JPOSCROLLX[nPlayer];
-		this.n移動開始Y[nPlayer] = OpenTaiko.stageGameScreen.JPOSCROLLY[nPlayer];
-		this.n総移動時間[nPlayer] = (int)(db移動時間 * 1000);
-		this.n移動方向[nPlayer] = n移動方向;
-		this.n移動距離px[nPlayer] = n移動px;
-		this.nVerticalJSPos[nPlayer] = vJs;
-		if (n移動方向 == 0) {
-			this.n移動目的場所X[nPlayer] = OpenTaiko.stageGameScreen.JPOSCROLLX[nPlayer] - n移動px;
-			this.n移動目的場所Y[nPlayer] = OpenTaiko.stageGameScreen.JPOSCROLLY[nPlayer] - vJs;
-		} else {
-			this.n移動目的場所X[nPlayer] = OpenTaiko.stageGameScreen.JPOSCROLLX[nPlayer] + n移動px;
-			this.n移動目的場所Y[nPlayer] = OpenTaiko.stageGameScreen.JPOSCROLLY[nPlayer] + vJs;
-		}
+	public void t判定枠移動(int nPlayer, CTja.CJPOSSCROLL jposscroll, int msTimeNote) {
+		this.n移動開始時刻[nPlayer] = msTimeNote;
+		this.n移動開始X[nPlayer] = jposscroll.pxOrigX;
+		this.n移動開始Y[nPlayer] = jposscroll.pxOrigY;
+		this.n総移動時間[nPlayer] = (int)jposscroll.msMoveDt;
+		double pxMoveDx = this.n移動距離px[nPlayer] = jposscroll.pxMoveDx;
+		double pxMoveDy = this.nVerticalJSPos[nPlayer] = jposscroll.pxMoveDy;
+		this.n移動目的場所X[nPlayer] = jposscroll.pxOrigX + pxMoveDx;
+		this.n移動目的場所Y[nPlayer] = jposscroll.pxOrigY + pxMoveDy;
 	}
 
 	#region[ private ]
@@ -864,14 +862,13 @@ internal class CActImplLaneTaiko : CActivity {
 
 
 	private int[] n総移動時間 = new int[5];
-	private int[] n移動開始X = new int[5];
-	private int[] n移動開始Y = new int[5];
+	private double[] n移動開始X = new double[5];
+	private double[] n移動開始Y = new double[5];
 	private int[] n移動開始時刻 = new int[5];
-	private int[] n移動距離px = new int[5];
-	private int[] nVerticalJSPos = new int[5];
-	private int[] n移動目的場所X = new int[5];
-	private int[] n移動目的場所Y = new int[5];
-	private int[] n移動方向 = new int[5];
+	private double[] n移動距離px = new double[5];
+	private double[] nVerticalJSPos = new double[5];
+	private double[] n移動目的場所X = new double[5];
+	private double[] n移動目的場所Y = new double[5];
 
 	//-----------------
 	#endregion

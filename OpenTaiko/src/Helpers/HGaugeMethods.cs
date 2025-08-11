@@ -255,6 +255,7 @@ class HGaugeMethods {
 			rainbowTexture.vcScaleRatio.X = scale_x;
 			rainbowTexture.vcScaleRatio.Y = scale_y;
 
+			rainbowTexture.Opacity = 255;
 			rainbowTexture.t2D描画(rainbow_x, rainbow_y);
 		}
 
@@ -299,9 +300,12 @@ class HGaugeMethods {
 		}
 	}
 
-	public static void tDrawClearIcon(CTexture clearIcon, Difficulty diff, int level, float currentPercent, int text_x, int text_y, EGaugeType gaugeType, int perfectHits, int totalNotes, Rectangle clearRect, Rectangle clearRectHighlight) {
+	public static void tDrawClearIcon(CTexture clearIcon, Difficulty diff, int level, float currentPercent, int text_x, int text_y, float scale_x, float scale_y, EGaugeType gaugeType, int perfectHits, int totalNotes, Rectangle clearRect, Rectangle clearRectHighlight) {
 		if (clearIcon == null) return;
 		if (diff > Difficulty.Edit) return;
+
+		clearIcon.vcScaleRatio.X = scale_x;
+		clearIcon.vcScaleRatio.Y = scale_y;
 
 		float percent = Math.Min(100f, Math.Max(0f, currentPercent));
 		bool highlight = (gaugeType != EGaugeType.NORMAL)
@@ -390,7 +394,7 @@ class HGaugeMethods {
 		tDrawGaugeFill(fillTexture, yellowTexture, (rainbowTextureArr != null && RainbowTextureIndex < rainbowTextureArr.Length) ? rainbowTextureArr[RainbowTextureIndex] : null, x, y, rainbow_x, rainbow_y, diff, level, currentPercent, gaugeType, scale_x, scale_y, Opacity, perfectHits, totalNotes);
 		if (!OpenTaiko.ConfigIni.SimpleMode) tDrawGaugeFlash(flashTexture, x, y, Opacity, diff, level, currentPercent, gaugeType, scale_x, scale_y);
 		tDrawKillZone(killzoneTexture, x, y, diff, level, gaugeType, scale_x, scale_y, perfectHits, totalNotes);
-		tDrawClearIcon(clearIcon, diff, level, currentPercent, text_x, text_y, gaugeType, perfectHits, totalNotes, clearRect, clearRectHighlight);
+		tDrawClearIcon(clearIcon, diff, level, currentPercent, text_x, text_y, scale_x, scale_y, gaugeType, perfectHits, totalNotes, clearRect, clearRectHighlight);
 		tDrawSoulFire(soulFire, diff, level, currentPercent, gaugeType, scale_x, scale_y, fire_x, fire_y, SoulFireIndex);
 		tDrawSoulLetter(soulLetter, diff, level, currentPercent, gaugeType, scale_x, scale_y, soul_x, soul_y);
 	}
@@ -405,7 +409,7 @@ class HGaugeMethods {
 		var _dif = OpenTaiko.stageSongSelect.nChoosenSongDifficulty[player];
 		return tNormaCheck(
 			(Difficulty)_dif,
-			OpenTaiko.stageSongSelect.rChoosenSong.score[_dif].譜面情報.nレベル[_dif],
+			OpenTaiko.stageSongSelect.rChoosenSong.score[_dif]?.譜面情報.nレベル[_dif] ?? -1,
 			tGetGaugeTypeEnum(chara.effect.tGetGaugeType()),
 			(float)OpenTaiko.stageGameScreen.actGauge.db現在のゲージ値[player],
 			UNSAFE_KillZonePercent(player)
@@ -429,7 +433,7 @@ class HGaugeMethods {
 		// Difficulty
 		int _dif = OpenTaiko.stageSongSelect.nChoosenSongDifficulty[player];
 		Difficulty difficulty = (Difficulty)_dif;
-		int level = OpenTaiko.stageSongSelect.rChoosenSong.score[_dif].譜面情報.nレベル[_dif];
+		int level = OpenTaiko.stageSongSelect.rChoosenSong.score[_dif]?.譜面情報.nレベル[_dif] ?? -1;
 
 		return tHardGaugeGetKillscreenRatio(
 			difficulty,

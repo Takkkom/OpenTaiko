@@ -301,15 +301,17 @@ internal class CActResultParameterPanel : CActivity {
 
 		// this.PuchiChara.IdleAnimation();
 
+		int nDrawnPlayers = OpenTaiko.ConfigIni.bAIBattleMode ? 1 : OpenTaiko.ConfigIni.nPlayerCount;
+		int nLayoutPlayers = OpenTaiko.ConfigIni.bAIBattleMode ? 2 : OpenTaiko.ConfigIni.nPlayerCount;
 		if (OpenTaiko.stageSongSelect.nChoosenSongDifficulty[0] != (int)Difficulty.Dan && OpenTaiko.stageSongSelect.nChoosenSongDifficulty[0] != (int)Difficulty.Tower) {
 			int[] namePlate_x = new int[5];
 			int[] namePlate_y = new int[5];
 
-			for (int i = 0; i < OpenTaiko.ConfigIni.nPlayerCount; i++) {
-				if (OpenTaiko.ConfigIni.nPlayerCount == 5) {
+			for (int i = 0; i < nDrawnPlayers; i++) {
+				if (nLayoutPlayers == 5) {
 					namePlate_x[i] = OpenTaiko.Skin.Result_NamePlate_5P[0] + OpenTaiko.Skin.Result_UIMove_5P_X[i];
 					namePlate_y[i] = OpenTaiko.Skin.Result_NamePlate_5P[1] + OpenTaiko.Skin.Result_UIMove_5P_Y[i];
-				} else if (OpenTaiko.ConfigIni.nPlayerCount == 4 || OpenTaiko.ConfigIni.nPlayerCount == 3) {
+				} else if (nLayoutPlayers == 4 || nLayoutPlayers == 3) {
 					namePlate_x[i] = OpenTaiko.Skin.Result_NamePlate_4P[0] + OpenTaiko.Skin.Result_UIMove_4P_X[i];
 					namePlate_y[i] = OpenTaiko.Skin.Result_NamePlate_4P[1] + OpenTaiko.Skin.Result_UIMove_4P_Y[i];
 				} else {
@@ -328,7 +330,7 @@ internal class CActResultParameterPanel : CActivity {
 			int AnimeCount = 3000 + GaugeFactor * 59;
 			int ScoreApparitionTimeStamp = AnimeCount + 420 * 4 + 840;
 
-			bool is1P = (OpenTaiko.ConfigIni.nPlayerCount == 1);
+			bool is1P = (nLayoutPlayers == 1);
 			bool is2PSide = OpenTaiko.P1IsBlue();
 
 			int shift = 635;
@@ -340,9 +342,7 @@ internal class CActResultParameterPanel : CActivity {
 				if (is2PSide) uioffset_x *= -1;
 			}
 
-			for (int i = 0; i < OpenTaiko.ConfigIni.nPlayerCount; i++) {
-				if (OpenTaiko.ConfigIni.bAIBattleMode && i == 1) break;
-
+			for (int i = 0; i < nDrawnPlayers; i++) {
 				// 1 if right, 0 if left
 				int shiftPos = (i == 1 || is2PSide) ? 1 : i;
 				int pos = i;
@@ -352,13 +352,13 @@ internal class CActResultParameterPanel : CActivity {
 
 				#region [General plate animations]
 
-				if (OpenTaiko.ConfigIni.nPlayerCount <= 2) {
+				if (nLayoutPlayers <= 2) {
 					if (shiftPos == 0)
 						OpenTaiko.Tx.Result_Panel.t2D描画(0 + uioffset_x, 0);
 					else
 						OpenTaiko.Tx.Result_Panel_2P.t2D描画(0 + uioffset_x, 0);
 				} else {
-					if (OpenTaiko.ConfigIni.nPlayerCount == 5) {
+					if (nLayoutPlayers == 5) {
 						OpenTaiko.Tx.Result_Panel_5P[i].t2D描画(OpenTaiko.Skin.Result_UIMove_5P_X[i], OpenTaiko.Skin.Result_UIMove_5P_Y[i]);
 					} else {
 						OpenTaiko.Tx.Result_Panel_4P[i].t2D描画(OpenTaiko.Skin.Result_UIMove_4P_X[i], OpenTaiko.Skin.Result_UIMove_4P_Y[i]);
@@ -374,13 +374,13 @@ internal class CActResultParameterPanel : CActivity {
 					int gauge_base_y;
 
 
-					if (OpenTaiko.ConfigIni.nPlayerCount == 5) {
+					if (nLayoutPlayers == 5) {
 						_frame.vcScaleRatio.X = 0.5f;
 						bar_x = OpenTaiko.Skin.Result_DifficultyBar_5P[0] + OpenTaiko.Skin.Result_UIMove_5P_X[pos];
 						bar_y = OpenTaiko.Skin.Result_DifficultyBar_5P[1] + OpenTaiko.Skin.Result_UIMove_5P_Y[pos];
 						gauge_base_x = OpenTaiko.Skin.Result_Gauge_Base_5P[0] + OpenTaiko.Skin.Result_UIMove_5P_X[pos];
 						gauge_base_y = OpenTaiko.Skin.Result_Gauge_Base_5P[1] + OpenTaiko.Skin.Result_UIMove_5P_Y[pos];
-					} else if (OpenTaiko.ConfigIni.nPlayerCount == 4 || OpenTaiko.ConfigIni.nPlayerCount == 3) {
+					} else if (nLayoutPlayers == 4 || nLayoutPlayers == 3) {
 						_frame.vcScaleRatio.X = 0.5f;
 						bar_x = OpenTaiko.Skin.Result_DifficultyBar_4P[0] + OpenTaiko.Skin.Result_UIMove_4P_X[pos];
 						bar_y = OpenTaiko.Skin.Result_DifficultyBar_4P[1] + OpenTaiko.Skin.Result_UIMove_4P_Y[pos];
@@ -420,7 +420,7 @@ internal class CActResultParameterPanel : CActivity {
 					if (ctゲージアニメ[i].IsEnded) {
 						if (ctゲージアニメ[i].CurrentValue != 50) {
 							// Gauge didn't reach rainbow
-							if (OpenTaiko.ConfigIni.nPlayerCount < 2
+							if (nDrawnPlayers < 2
 								|| ctゲージアニメ[(i == 0) ? 1 : 0].IsEnded)
 								OpenTaiko.Skin.soundGauge.tStop();
 						} else {
@@ -459,7 +459,7 @@ internal class CActResultParameterPanel : CActivity {
 							OpenTaiko.stageGameScreen.CChartScore[i].nGreat,
 							OpenTaiko.stageGameScreen.CChartScore[i].nGood,
 							OpenTaiko.stageGameScreen.CChartScore[i].nMiss,
-							OpenTaiko.stageGameScreen.GetRoll(i),
+							OpenTaiko.stageGameScreen.CChartScore[i].nRoll,
 							OpenTaiko.stageGameScreen.actCombo.nCurrentCombo.最高値[i],
 							OpenTaiko.stageGameScreen.CChartScore[i].nADLIB,
 							OpenTaiko.stageGameScreen.CChartScore[i].nMine,
@@ -468,7 +468,7 @@ internal class CActResultParameterPanel : CActivity {
 						int[][] num_x;
 
 						int[][] num_y;
-						if (OpenTaiko.ConfigIni.nPlayerCount == 5) {
+						if (nLayoutPlayers == 5) {
 							num_x = new int[][] { new int[5], new int[5], new int[5], new int[5], new int[5], new int[5], new int[5] };
 							num_y = new int[][] { new int[5], new int[5], new int[5], new int[5], new int[5], new int[5], new int[5] };
 
@@ -492,7 +492,7 @@ internal class CActResultParameterPanel : CActivity {
 
 							num_x[6][pos] = OpenTaiko.Skin.Result_Bomb_5P[0] + OpenTaiko.Skin.Result_UIMove_5P_X[pos];
 							num_y[6][pos] = OpenTaiko.Skin.Result_Bomb_5P[1] + OpenTaiko.Skin.Result_UIMove_5P_Y[pos];
-						} else if (OpenTaiko.ConfigIni.nPlayerCount > 2) {
+						} else if (nLayoutPlayers > 2) {
 							num_x = new int[][] { new int[5], new int[5], new int[5], new int[5], new int[5], new int[5], new int[5] };
 							num_y = new int[][] { new int[5], new int[5], new int[5], new int[5], new int[5], new int[5], new int[5] };
 
@@ -542,9 +542,9 @@ internal class CActResultParameterPanel : CActivity {
 							if (ctMainCounter.CurrentValue >= AnimeCount + (Interval * k)) {
 								float numScale = 1.0f;
 
-								if (OpenTaiko.ConfigIni.nPlayerCount == 5) {
+								if (nLayoutPlayers == 5) {
 									numScale = OpenTaiko.Skin.Result_Number_Scale_5P;
-								} else if (OpenTaiko.ConfigIni.nPlayerCount == 3 || OpenTaiko.ConfigIni.nPlayerCount == 4) {
+								} else if (nLayoutPlayers == 3 || nLayoutPlayers == 4) {
 									numScale = OpenTaiko.Skin.Result_Number_Scale_4P;
 								}
 								OpenTaiko.Tx.Result_Number.vcScaleRatio.X = ctMainCounter.CurrentValue <= AnimeCount + (Interval * k) + AddCount ? 1.3f - (float)Math.Sin((ctMainCounter.CurrentValue - (AnimeCount + (Interval * k))) / (AddCount / 90) * (Math.PI / 180)) * 0.3f : 1.0f;
@@ -575,11 +575,11 @@ internal class CActResultParameterPanel : CActivity {
 							float numScale = 1.0f;
 							int score_x;
 							int score_y;
-							if (OpenTaiko.ConfigIni.nPlayerCount == 5) {
+							if (nLayoutPlayers == 5) {
 								numScale = OpenTaiko.Skin.Result_Score_Scale_5P;
 								score_x = OpenTaiko.Skin.Result_Score_5P[0] + OpenTaiko.Skin.Result_UIMove_5P_X[pos];
 								score_y = OpenTaiko.Skin.Result_Score_5P[1] + OpenTaiko.Skin.Result_UIMove_5P_Y[pos];
-							} else if (OpenTaiko.ConfigIni.nPlayerCount == 4 || OpenTaiko.ConfigIni.nPlayerCount == 3) {
+							} else if (nLayoutPlayers == 4 || nLayoutPlayers == 3) {
 								numScale = OpenTaiko.Skin.Result_Score_Scale_4P;
 								score_x = OpenTaiko.Skin.Result_Score_4P[0] + OpenTaiko.Skin.Result_UIMove_4P_X[pos];
 								score_y = OpenTaiko.Skin.Result_Score_4P[1] + OpenTaiko.Skin.Result_UIMove_4P_Y[pos];
@@ -691,9 +691,7 @@ internal class CActResultParameterPanel : CActivity {
 
 			#region [Character related animations]
 
-			for (int p = 0; p < OpenTaiko.ConfigIni.nPlayerCount; p++) {
-				if (OpenTaiko.ConfigIni.bAIBattleMode && p == 1) break;
-
+			for (int p = 0; p < nDrawnPlayers; p++) {
 				int pos = p;
 				if (is2PSide)
 					pos = 1;
@@ -783,8 +781,8 @@ internal class CActResultParameterPanel : CActivity {
 
 				#region [PuchiChara]
 
-				int puchi_x = chara_x + OpenTaiko.Skin.Adjustments_MenuPuchichara_X[OpenTaiko.ConfigIni.nPlayerCount <= 2 ? pos : 0];
-				int puchi_y = chara_y + OpenTaiko.Skin.Adjustments_MenuPuchichara_Y[OpenTaiko.ConfigIni.nPlayerCount <= 2 ? pos : 0];
+				int puchi_x = chara_x + OpenTaiko.Skin.Adjustments_MenuPuchichara_X[nLayoutPlayers <= 2 ? pos : 0];
+				int puchi_y = chara_y + OpenTaiko.Skin.Adjustments_MenuPuchichara_Y[nLayoutPlayers <= 2 ? pos : 0];
 
 				//int ttdiff = 640 - 152;
 				//int ttps = 640 + ((pos == 1) ? ttdiff + 60 : -ttdiff);
@@ -803,7 +801,7 @@ internal class CActResultParameterPanel : CActivity {
 
 					#region [Cherry blossom animation]
 
-					if (gaugeValues[p] >= 80.0f && OpenTaiko.ConfigIni.nPlayerCount <= 2) {
+					if (OpenTaiko.stageResults.nクリア[p] >= 1 && nLayoutPlayers <= 2) {
 						OpenTaiko.Tx.Result_Flower.vcScaleRatio.X = 0.6f * (ctMainCounter.CurrentValue <= MountainAppearValue + AddCount ? 1.3f - (float)Math.Sin((ctMainCounter.CurrentValue - MountainAppearValue) / (AddCount / 90) * (Math.PI / 180)) * 0.3f : 1.0f);
 						OpenTaiko.Tx.Result_Flower.vcScaleRatio.Y = 0.6f * (ctMainCounter.CurrentValue <= MountainAppearValue + AddCount ? 1.3f - (float)Math.Sin((ctMainCounter.CurrentValue - MountainAppearValue) / (AddCount / 90) * (Math.PI / 180)) * 0.3f : 1.0f);
 
@@ -818,7 +816,7 @@ internal class CActResultParameterPanel : CActivity {
 
 					#region [Cherry blossom Rotating flowers]
 
-					if (gaugeValues[p] >= 80.0f && OpenTaiko.ConfigIni.nPlayerCount <= 2) {
+					if (OpenTaiko.stageResults.nクリア[p] >= 1 && nLayoutPlayers <= 2) {
 						float FlowerTime = ctRotate_Flowers.CurrentValue;
 
 						for (int i = 0; i < 5; i++) {
@@ -851,7 +849,7 @@ internal class CActResultParameterPanel : CActivity {
 
 					#region [Panel shines]
 
-					if (gaugeValues[p] >= 80.0f && OpenTaiko.ConfigIni.nPlayerCount <= 2) {
+					if (OpenTaiko.stageResults.nクリア[p] >= 1 && nLayoutPlayers <= 2) {
 						int ShineTime = (int)ctShine_Plate.CurrentValue;
 						int Quadrant500 = ShineTime % 500;
 
@@ -880,32 +878,27 @@ internal class CActResultParameterPanel : CActivity {
 					int Mood = 0;
 					int MoodV2 = 0;
 
-					if (gaugeValues[p] >= 100.0f)
-						Mood = 3;
-					else if (gaugeValues[p] >= 80.0f)
-						Mood = 2;
-					else if (gaugeValues[p] >= 40.0f)
-						Mood = 1;
-
 					if (OpenTaiko.stageResults.nクリア[p] == 4) {
+						Mood = 3;
 						MoodV2 = 5;
 					} else if (OpenTaiko.stageResults.nクリア[p] == 3) {
+						Mood = 3;
 						MoodV2 = 4;
 					} else if (OpenTaiko.stageResults.nクリア[p] >= 1) {
 						if (gaugeValues[p] >= 100.0f) {
-							MoodV2 = 3;
+							Mood = MoodV2 = 3;
 						} else {
-							MoodV2 = 2;
+							Mood = MoodV2 = 2;
 						}
 					} else if (OpenTaiko.stageResults.nクリア[p] == 0) {
 						if (gaugeValues[p] >= 40.0f) {
-							MoodV2 = 1;
+							Mood = MoodV2 = 1;
 						} else {
-							MoodV2 = 0;
+							Mood = MoodV2 = 0;
 						}
 					}
 
-					if (OpenTaiko.ConfigIni.nPlayerCount <= 2) {
+					if (nLayoutPlayers <= 2) {
 						int speechBuddle_width = OpenTaiko.Tx.Result_Speech_Bubble[pos].szTextureSize.Width / 4;
 						int speechBuddle_height = OpenTaiko.Tx.Result_Speech_Bubble[pos].szTextureSize.Height / 3;
 
@@ -914,7 +907,7 @@ internal class CActResultParameterPanel : CActivity {
 						OpenTaiko.Tx.Result_Speech_Bubble[pos].t2D拡大率考慮中央基準描画(OpenTaiko.Skin.Result_Speech_Bubble_X[pos], OpenTaiko.Skin.Result_Speech_Bubble_Y[pos],
 							new Rectangle(Mood * speechBuddle_width, RandomText * speechBuddle_height, speechBuddle_width, speechBuddle_height));
 					}
-					int speech_vubble_index = OpenTaiko.ConfigIni.nPlayerCount <= 2 ? pos : 2;
+					int speech_vubble_index = nLayoutPlayers <= 2 ? pos : 2;
 					if (OpenTaiko.Tx.Result_Speech_Bubble_V2[speech_vubble_index] != null) {
 						int speechBuddle_width = OpenTaiko.Tx.Result_Speech_Bubble_V2[speech_vubble_index].szTextureSize.Width;
 						int speechBuddle_height = OpenTaiko.Tx.Result_Speech_Bubble_V2[speech_vubble_index].szTextureSize.Height / 6;
@@ -922,15 +915,15 @@ internal class CActResultParameterPanel : CActivity {
 						int speech_bubble_x;
 						int speech_bubble_y;
 						float scale;
-						if (OpenTaiko.ConfigIni.nPlayerCount == 5) {
+						if (nLayoutPlayers == 5) {
 							speech_bubble_x = OpenTaiko.Skin.Result_Speech_Bubble_V2_5P[0] + OpenTaiko.Skin.Result_UIMove_5P_X[pos];
 							speech_bubble_y = OpenTaiko.Skin.Result_Speech_Bubble_V2_5P[1] + OpenTaiko.Skin.Result_UIMove_5P_Y[pos];
 							scale = 0.5f;
-						} else if (OpenTaiko.ConfigIni.nPlayerCount == 4 || OpenTaiko.ConfigIni.nPlayerCount == 3) {
+						} else if (nLayoutPlayers == 4 || nLayoutPlayers == 3) {
 							speech_bubble_x = OpenTaiko.Skin.Result_Speech_Bubble_V2_4P[0] + OpenTaiko.Skin.Result_UIMove_4P_X[pos];
 							speech_bubble_y = OpenTaiko.Skin.Result_Speech_Bubble_V2_4P[1] + OpenTaiko.Skin.Result_UIMove_4P_Y[pos];
 							scale = 0.5f;
-						} else if (OpenTaiko.ConfigIni.nPlayerCount == 2) {
+						} else if (nLayoutPlayers == 2) {
 							speech_bubble_x = OpenTaiko.Skin.Result_Speech_Bubble_V2_2P_X[pos];
 							speech_bubble_y = OpenTaiko.Skin.Result_Speech_Bubble_V2_2P_Y[pos];
 							scale = 0.5f;
@@ -952,7 +945,7 @@ internal class CActResultParameterPanel : CActivity {
 							speech_bubble_y + (int)(OpenTaiko.Skin.Result_Speech_Text_Offset[1] * scale));
 					}
 					if (!b音声再生[11]) {
-						if (gaugeValues[p] >= 80.0f) {
+						if (OpenTaiko.stageResults.nクリア[p] >= 1) {
 							//TJAPlayer3.Skin.soundDonClear.t再生する();
 							OpenTaiko.Skin.voiceResultClearSuccess[OpenTaiko.GetActualPlayer(p)]?.tPlay();
 						} else {
@@ -960,7 +953,7 @@ internal class CActResultParameterPanel : CActivity {
 							OpenTaiko.Skin.voiceResultClearFailed[OpenTaiko.GetActualPlayer(p)]?.tPlay();
 						}
 
-						if (p == OpenTaiko.ConfigIni.nPlayerCount - 1)
+						if (p == nDrawnPlayers - 1)
 							b音声再生[11] = true;
 					}
 
@@ -1007,10 +1000,10 @@ internal class CActResultParameterPanel : CActivity {
 
 							int scoreRankEffect_x;
 							int scoreRankEffect_y;
-							if (OpenTaiko.ConfigIni.nPlayerCount == 5) {
+							if (nLayoutPlayers == 5) {
 								scoreRankEffect_x = OpenTaiko.Skin.Result_ScoreRankEffect_5P[0] + OpenTaiko.Skin.Result_UIMove_5P_X[pos];
 								scoreRankEffect_y = OpenTaiko.Skin.Result_ScoreRankEffect_5P[1] + OpenTaiko.Skin.Result_UIMove_5P_Y[pos];
-							} else if (OpenTaiko.ConfigIni.nPlayerCount == 4 || OpenTaiko.ConfigIni.nPlayerCount == 3) {
+							} else if (nLayoutPlayers == 4 || nLayoutPlayers == 3) {
 								scoreRankEffect_x = OpenTaiko.Skin.Result_ScoreRankEffect_4P[0] + OpenTaiko.Skin.Result_UIMove_4P_X[pos];
 								scoreRankEffect_y = OpenTaiko.Skin.Result_ScoreRankEffect_4P[1] + OpenTaiko.Skin.Result_UIMove_4P_Y[pos];
 							} else {
@@ -1069,10 +1062,10 @@ internal class CActResultParameterPanel : CActivity {
 
 							int crownEffect_x;
 							int crownEffect_y;
-							if (OpenTaiko.ConfigIni.nPlayerCount == 5) {
+							if (nLayoutPlayers == 5) {
 								crownEffect_x = OpenTaiko.Skin.Result_CrownEffect_5P[0] + OpenTaiko.Skin.Result_UIMove_5P_X[pos];
 								crownEffect_y = OpenTaiko.Skin.Result_CrownEffect_5P[1] + OpenTaiko.Skin.Result_UIMove_5P_Y[pos];
-							} else if (OpenTaiko.ConfigIni.nPlayerCount == 4 || OpenTaiko.ConfigIni.nPlayerCount == 3) {
+							} else if (nLayoutPlayers == 4 || nLayoutPlayers == 3) {
 								crownEffect_x = OpenTaiko.Skin.Result_CrownEffect_4P[0] + OpenTaiko.Skin.Result_UIMove_4P_X[pos];
 								crownEffect_y = OpenTaiko.Skin.Result_CrownEffect_4P[1] + OpenTaiko.Skin.Result_UIMove_4P_Y[pos];
 							} else {
@@ -1140,6 +1133,11 @@ internal class CActResultParameterPanel : CActivity {
 	public float MountainAppearValue;
 	private int GaugeFactor;
 
+	/// <summary>
+	/// Indexes:
+	/// 0: soundGauge, 1~7: soundPon (Perfect_X, Good_X, Miss_X, Roll_X, MaxCombo_X, ADLib_X, Bomb),
+	/// 8: soundScoreDon, 9: soundRankIn, 10: soundCrownIn, 11: voiceResultClearSuccess / voiceResultClearFailed
+	/// </summary>
 	public bool[] b音声再生 = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
 
 	// Cherry blossom flowers variables

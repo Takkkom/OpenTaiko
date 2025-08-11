@@ -1,7 +1,247 @@
 # Changelog
 
+## [0.6.0.87] - 2025-08-09 (Beta)
+
+- [Fix] note lane became transparent in training mode for charts with BGA/MOVIE (not played in training mode)
+- [Fix] #BARLINE ignored scroll mode
+- [Fix] fuze rolls were counted into bar roll length (beyond balloon hit count) for scoring and Dan-i exam monitoring
+- [Fix] dan-i monitoring for AdLib, Mine, & Fuze roll notes was broken because these notes were not counted in TJA parsing due to wrong note type checking conditions
+- [Fix] timing window of fuze roll was the same as bar rolls and not expectedly the same as regular balloons
+- [Fix] music played too early when users retry after music plays and then pause + resume before music plays (although was able to resync when the music should play)
+- [Fix] AI battle mode failed to use 2P layout due to the fix of 0.6.0.79
+- [Fix] setting duplicated key binds for the same key overrode the next key bind under cursor by stopping shifting out removed key binds
+- [Fix] hitting AdLibs at combo milestone retriggered combo milestone effects
+- [Fix] players' animation failed to exit max-soul state after retrying
+- [Fix] balloon/Kusu chara/puchi animation for charts with dense balloon-type notes, follow-up of 0.6.0.55
+- [Fix] player chara & puchi animation ignored play speed
+- [Fix] go-go judgemark fire, activated balloon, and number bubble for balloon and fuze rolls ignored JPosScroll
+
+## [0.6.0.86] - 2025-08-07 (Beta)
+
+- [Fix] Fix Rainbow gauges flickering
+
+## [0.6.0.85] - 2025-08-02 (Beta)
+
+- [Fix] Fix a crash that occurs when clearing a Dan that has a title less than 2 chars in length
+
+## [0.6.0.84] - 2025-07-28 (Beta)
+
+- [Feat] Implemented native OpenGL rendering for MacOS
+
+## [0.6.0.83] - 2025-07-02 (Beta)
+
+- Unlockables and nameplates update
+
+## [0.6.0.82] - 2025-06-29 (Beta)
+
+- [Chore] Add (future) ch6 nameplates
+
+## [0.6.0.81] - 2025-06-24 (Beta)
+
+- [Fix] Skip OS default fonts, fallback to packaged font instead
+
+## [0.6.0.80] - 2025-06-18 (Beta)
+
+- [Fix] Fix accuracy exam monitoring
+
+## [0.6.0.79] - 2025-06-16 (Beta)
+
+- [Fix] AI battle mode result mode bugs due to not treating player count as 1, including character's "success"/"failed" voice looped every frame infinitely
+- [Fix] Result screen used hardcoded 80% gauge value for some success/failed animations and caused wrong animations for non–80%+-clear gauges
+
+## [0.6.0.78] - 2025-06-16 (Beta)
+
+- [Enhancement] Judge exam requirement reachability live for JudgeADLIB, JudgeMine, Roll, Hit, Accuracy, & Score (use gen-4 score, no live failure in non–gen-4-Shin-uchi score mode) exams (no live failure for branched songs) 
+- [Enhancement] Monitor gauge exam status with gen-4 style standard; monitor near-failure, near-success, near-better-success status and add gauge exam status transition and blinking animation
+- [Enhancement] Fade out past individual exams at 4th song and on
+- [Fix] Exam last note determination
+- [Fix] Miss jugements in auto were not counted in Dan exams
+- [Fix] Dan exam visuals
+- [Fix] Scoring issues in Dan charts (Balloons being treated as 1 hit in the score calculation formula)
+- [Fix] Dan gameplay failed to move to the next song if the last defined branch before #NEXTSONG is not taken
+- [Fix] First Dan song was the only song recognized as branched if the whole Dan contains any branched song even if not the first song
+
+## [0.6.0.77] - 2025-06-15 (Beta)
+
+- [Fix] Use SDL for Linux w/ Wayland fixing it not booting/booting with a blank window (GLFW is kept for Windows and Linux w/ X11)
+
+## [0.6.0.76] - 2025-06-14 (Beta)
+
+- [Fix] Fix gauge clear text sometimes being incorrectly scaled on blue 1P
+
+## [0.6.0.75] - 2025-06-08 (Beta)
+
+- [Enhancement] Add custom color support for VTT lyrics
+
+## [0.6.0.74] - 2025-06-07 (Beta)
+
+- [i18n] Global Trigger and Counter Russian and Chinese Text
+
+## [0.6.0.73] - 2025-06-07 (Beta)
+
+- [Fix] Note symbols after last comma (before #END) were treated as 16 divisions per measure
+- [Fix] Unknown note symbols were treated as #NMSCROLL
+- [Fix] Ignore inner whitespaces in note symbol lines (Jiro cross compatibility)
+- [Fix] First arbitrary mid-line #START (e.g., TITLE:#START) to be recognized as #START by forbidding indentation of #START
+- [Fix] Commented-out or in-argument COURSE: & #END affected parsing by requiring them to be at line head
+- [Fix] COURSE: argument failed to be recognized when it has surrounding space(s)
+- [Fix] 2-players chart took in AI battle mode
+- [Fix] BALLOON headers could not reset balloon counts and failed to work per–player-side (Jiro cross compatibility)
+- [Fix] Non–Shin-uchi score setting for non-P1 was forced to P1's
+- [Fix] Make all #NEXTSONG argument soft-optional to prevent crashes due to ,s at line end ignored
+- [Fix] TJA command trailing , trimming issues
+- [Fix] Consecutive spaces in #JPOSSCROLL, #SUDDEN, & #BGAON terminates TJA parsing
+- [Fix] 2nd colon (:) and on ignored for per-player-side and EXAM headers and remove handling of impossible cases
+- [Fix] Crash when LogCards are frequently added into CVisualLogManager
+- [Fix] Last-defined difficulty was used as the score setting difficulty, <cd> store-expr variable difficulty, and reported parsing difficulty
+- [Fix] Reject invalid argument instead of using a default value for commands #BPMCHANGE, #SCROLL, #MEASURE, #DELAY, & CAM setter, and EXAM header
+- [Enhancement] Multiple tja chart parsing performance improvements
+- [Feat] Catch and report argument error per TJA header or command
+- [Feat] Print and log every TJA parse warning right away
+- [Feat] Use simplified message for printed TJA parse warnings
+
+## [0.6.0.72] - 2025-06-05 (Beta)
+
+- [Feat] Add Unlock conditions for Global counters and triggers
+
+## [0.6.0.71] - 2025-06-04 (Beta)
+
+- [Chore] Global Counters database commands
+- [Chore] Few nameplates additions/renames
+- [Feat] Now handles repeat mode for chart cutscenes
+
+## [0.6.0.70] - 2025-06-03 (Beta)
+
+- [Chore] Automatically update Saves.db to add the global counters table
+
+## [0.6.0.69] - 2025-06-02 (Beta)
+
+- [Feat] Add the unlock conditions "andcomb" and "orcomb" allowing combining multiple unlock conditions for a single asset
+
+## [0.6.0.68] - 2025-05-31 (Beta)
+
+- [Chore] Handle Global Triggers methods on save files
+
+## [0.6.0.67] - 2025-05-31 (Beta)
+
+- [Enhancement] Pause the BGA/MOVIE instead of hiding it for STAGE FAILED
+- [BugFix] Crash when playing a song with any BGA/MOVIE ever played, then choose another song, then seek to after any BPM/MOVIE in this song should play before any such event plays, and then resume play
+- [BugFix] BGIMAGE was drawn when BGA is shown or in training mode
+- [BugFix] BGA/MOVIE window display did not hide on #BGAOFF or retrying
+- [BugFix] BGIMAGE was overlapped by predefined background and was invisible
+
+## [0.6.0.66] - 2025-05-30 (Beta)
+
+- Reintroduce the 0.6.0.64 update with the crashes fixed
+
+## [0.6.0.65] - 2025-05-30 (Beta)
+
+- [Hotfix] Revert 0.6.0.64 due to unexpected crashes until a fix is proposed
+
+## [0.6.0.64] - 2025-05-30 (Beta)
+
+- Fix high BPM (e.g., 10^16) caused crash due to character frame index overflowed by huge-valued frame counter
+- Fix looped character animation had each loop delayed to align to drawing frame
+- Fix exiting Kusudama flew too far when BPM is high
+
+## [0.6.0.63] - 2025-05-28 (Beta)
+
+- Refactor code handling Unlockables
+
+## [0.6.0.62] - 2025-05-27 (Beta)
+
+- HB/BMScroll roll fix
+
+## [0.6.0.61] - 2025-05-19 (Beta)
+
+- Update NameplatesUnlockables.db3
+
+## [0.6.0.60] - 2025-05-18 (Beta)
+
+- Update SongUnlockables.db3
+
+## [0.6.0.59] - 2025-05-09 (Beta)
+
+- [Feat] Add .optksc as a file format, for creating shortcuts pointing to existing songs
+- [Enhancement] Account for all localized text when using Search by Text feature in song select
+- [Enhancement] Various minor optimizations on puchichara display, scene presets
+
+## [0.6.0.58] - 2025-05-04 (Beta)
+
+- [Hotfix] Revert 0.6.0.57 Silk.Net update due to unexpected crashes when inputing specific buttons
+
+## [0.6.0.57] - 2025-05-03 (Beta)
+
+This reverts commit 14f85feef88ae9858b4a13f0f2945daa7eb6be19.
+This reverts commit e0cb6643f04bc83b100e7d48997eb448d0417836.
+- [Chore] Update Silk.NET to 2.22
+
+## [0.6.0.56] - 2025-05-03 (Beta)
+
+- [Fix] Stretching-disabled rolls still stretched on scroll method changes
+- [Fix] Stretching-disabled rolls have incorrect roll end SENote position
+
+## [0.6.0.55] - 2025-05-02 (Beta)
+
+- [Fix] Softlock when selecting any dan from the Dan Dojo select menu
+- [Fix] Puchicharas suddenly disappearing after interacting with a Balloon or Kusudama
+- [Enhancement] UTF-8 support for tja charts
+
+## [0.6.0.54] - 2025-04-03 (Beta)
+
+- Fix: Fade out on results screen was too long due to using the in-game fade-out preset
+
+## [0.6.0.53] - 2025-04-01 (Beta)
+
+- [Hotfix] Prevent null-reference crash due to cutscenes were undefined in pre-0.6.0.52 song list cache
+
+## [0.6.0.52] - 2025-04-01 (Beta)
+
+- Add .CUTSCENE_IN/OUTRO (custom OpenTaiko-exclusive TJA header for events/story mode) to play video cutscenes when starting a song (before loading screen) or after a cleared/failed play (after the results screen), skippable or pausable on the ESC/F1 menu
+- Restore result screen fade-out transition
+- Various minor refactoring
+
+## [0.6.0.51] - 2025-04-01 (Beta)
+
+- Fix: prevent crash due to video resource double-free access violation errors
+- Fix multiplayer video crash due to wrongly reusing AVFormatContext
+- Fix TJA `#BGAOFF` did not resume main video playback
+
+## [0.6.0.50] - 2025-03-31 (Beta)
+
+- Fix crash when rapidly closing the game twice
+- Remove deprecated code related to DTXMania's set.def
+- Fix songs without any parent `box.def` emptied out the entire song selection list due to null reference exception
+
+## [0.6.0.49] - 2025-03-15 (Beta)
+
+- [Fix] Stretch rolls are now also disabled on #BPMCHANGE
+- [Fix] Color tags no longer appear on unlocked dan titles
+
+## [0.6.0.48] - 2025-03-10 (Beta)
+
+- [Feat] Support #JPOSSCROLL distance with fractional parts
+- [Fix] Bar lines are now consistently drawn below notes.
+- [Fix] Notes are now drawn according to their definition order
+- [Fix] Re-enable Kusudamas in training mode
+- [Fix] Prevent notes from being "played" during training mode seeking
+- [Fix] Resuming in training mode will no longer remove unended rolls on the resuming point.
+- [Fix] The "force certain rolls to be drawn above non-rolls" behavior, which caused unstable draw order, is now removed.
+- [Fix] Negative-length Kusudama will no longer have its breaking animation played, unless it is hit during the pre–balloon-head 17ms judgement window before its end comes.
+
+## [0.6.0.47] - 2025-03-05 (Beta)
+
+- [Fix] AD-LIBs and bombs were invisible and unhittable if their horizontal speed is negative
+- [Fix] Could only hit early for notes right before a negative-#SCROLL roll
+- [Fix] Sometimes balloons got 1 extra hit despite not in autoplay
+
+## [0.6.0.46] - 2025-02-23 (Beta)
+
+- Disable stretching rolls until a format/option for them is decided
+
 ## [0.6.0.45] - 2025-02-21 (Beta)
 
+- Fix crashes on undefined difficulties (LEVEL before COURSE)
 - [Fix] No longer close the box and prevent the cursor being sent far for no reason after a after a completed play
 - [Fix] No longer close the box and prevent the cursor being sent far for no reason after a after a completed play
 

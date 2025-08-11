@@ -177,108 +177,9 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 	public override void Activate() {
 		LoudnessMetadataScanner.StopBackgroundScanning(joinImmediately: false);
 
-		this.bフィルイン中 = false;
-		this.n待機中の大音符の座標 = 0;
-		this.actGame.t叩ききりまショー_初期化();
-		base.ReSetScore(OpenTaiko.TJA.nScoreInit[0, OpenTaiko.stageSongSelect.nChoosenSongDifficulty[0]], OpenTaiko.TJA.nScoreDiff[OpenTaiko.stageSongSelect.nChoosenSongDifficulty[0]]);
-
-		#region [ branch ]
-		for (int i = 0; i < 5; i++) {
-			this.n分岐した回数[i] = 0;
-			this.bLEVELHOLD[i] = false;
-		}
-		this.nBranch条件数値A = 0;
-		this.nBranch条件数値B = 0;
-		#endregion
-
-		if ((OpenTaiko.TJA.listVD.TryGetValue(1, out CVideoDecoder vd2))) {
-			ShowVideo = true;
-		} else {
-			ShowVideo = false;
-		}
-
 		base.Activate();
-		base.ePhaseID = CStage.EPhase.Common_NORMAL;//初期化すれば、リザルト変遷は止まる。
-
-		for (int i = 0; i < 5; i++) {
-			ifp[i] = false;
-			isDeniedPlaying[i] = false;
-
-			if (bIsAlreadyCleared[i]) {
-				actBackground.ClearIn(i);
-			}
-		}
-
-		this.nStoredHit = new int[OpenTaiko.ConfigIni.nPlayerCount];
-
-		dtLastQueueOperation = DateTime.MinValue;
-
-		PuchiChara.ChangeBPM(60.0 / OpenTaiko.stageGameScreen.actPlayInfo.dbBPM[0]);
-
-		//dbUnit = Math.Ceiling( dbUnit * 1000.0 );
-		//dbUnit = dbUnit / 1000.0;
-
-		//if (this.actChara.ctキャラクターアクションタイマ != null) this.actChara.ctキャラクターアクションタイマ = new CCounter();
-
-		//this.actDancer.ct通常モーション = new CCounter( 0, this.actDancer.arモーション番号_通常.Length - 1, ( dbUnit * 4.0) / this.actDancer.arモーション番号_通常.Length, CSound管理.rc演奏用タイマ );
-		//this.actDancer.ctモブ = new CCounter( 1.0, 16.0, ((60.0 / CDTXMania.stage演奏ドラム画面.actPlayInfo.dbBPM / 16.0 )), CSound管理.rc演奏用タイマ );
-
 
 		this.ct手つなぎ = new CCounter(0, 60, 20, OpenTaiko.Timer);
-		this.ShownLyric2 = 0;
-
-
-		string diffToString(int diff) {
-			string[] diffArr =
-			{
-				" Easy ",
-				" Normal ",
-				" Hard ",
-				" Extreme ",
-				" Extra ",
-				" Tower ",
-				" Dan "
-			};
-			string[] diffArrIcon =
-			{
-				"-",
-				"",
-				"+"
-			};
-
-			int level = OpenTaiko.stageSongSelect.rChoosenSong.nLevel[diff];
-			CTja.ELevelIcon levelIcon = OpenTaiko.stageSongSelect.rChoosenSong.nLevelIcon[diff];
-
-			return (diffArr[Math.Min(diff, 6)] + "Lv." + level + diffArrIcon[(int)levelIcon]);
-		}
-
-		// Discord Presence の更新
-		string details = OpenTaiko.ConfigIni.SendDiscordPlayingInformation ? OpenTaiko.stageSongSelect.rChoosenSong.ldTitle.GetString("")
-																			 + diffToString(OpenTaiko.stageSongSelect.nChoosenSongDifficulty[0]) : "";
-
-		// Byte count must be used instead of String.Length.
-		// The byte count is what Discord is concerned with. Some chars are greater than one byte.
-		if (Encoding.UTF8.GetBytes(details).Length > 128) {
-			byte[] details_byte = Encoding.UTF8.GetBytes(details);
-			Array.Resize(ref details_byte, 128);
-			details = Encoding.UTF8.GetString(details_byte);
-		}
-
-		var difficultyName = OpenTaiko.DifficultyNumberToEnum(OpenTaiko.stageSongSelect.nChoosenSongDifficulty[0]).ToString();
-
-		OpenTaiko.DiscordClient?.SetPresence(new RichPresence() {
-			Details = details,
-			State = "Playing" + (OpenTaiko.ConfigIni.bAutoPlay[0] == true ? " (Auto)" : ""),
-			Timestamps = new Timestamps(DateTime.UtcNow, DateTime.UtcNow.AddMilliseconds(OpenTaiko.TJA.TjaTimeToGameTime(OpenTaiko.TJA.listChip[OpenTaiko.TJA.listChip.Count - 1].n発声時刻ms))),
-			Assets = new Assets() {
-				SmallImageKey = OpenTaiko.ConfigIni.SendDiscordPlayingInformation ? difficultyName.ToLower() : "",
-				SmallImageText = OpenTaiko.ConfigIni.SendDiscordPlayingInformation ? String.Format("COURSE:{0} ({1})", difficultyName, OpenTaiko.stageSongSelect.nChoosenSongDifficulty[0]) : "",
-				LargeImageKey = OpenTaiko.LargeImageKey,
-				LargeImageText = OpenTaiko.LargeImageText,
-			}
-		});
-
-
 
 		// When performing calibration, reduce audio distraction from user input.
 		// For users who play primarily by listening to the music,
@@ -307,6 +208,98 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 			if (this.soundClap[i] != null) this.soundClap[i].SoundPosition = _panning;
 		}
 	}
+
+	public override void t数値の初期化(bool b演奏記録, bool b演奏状態) {
+		int iPrevTopChipMax = this.nCurrentTopChip.Max();
+		base.t数値の初期化(b演奏記録, b演奏状態);
+
+		if (b演奏状態) {
+			this.actGame.t叩ききりまショー_初期化();
+
+			for (int i = 0; i < 5; i++) {
+				if (bIsAlreadyCleared[i]) {
+					actBackground.ClearIn(i);
+				}
+			}
+		}
+
+		if (b演奏状態) {
+			string diffToString(int diff) {
+				string[] diffArr =
+				{
+					" Easy ",
+					" Normal ",
+					" Hard ",
+					" Extreme ",
+					" Extra ",
+					" Tower ",
+					" Dan "
+				};
+				string[] diffArrIcon =
+				{
+					"-",
+					"",
+					"+"
+				};
+
+				int level = OpenTaiko.stageSongSelect.rChoosenSong.nLevel[diff];
+				CTja.ELevelIcon levelIcon = OpenTaiko.stageSongSelect.rChoosenSong.nLevelIcon[diff];
+
+				return (diffArr[Math.Min(diff, 6)] + "Lv." + level + diffArrIcon[(int)levelIcon]);
+			}
+
+			// Discord Presence の更新
+			string details = OpenTaiko.ConfigIni.SendDiscordPlayingInformation ? OpenTaiko.stageSongSelect.rChoosenSong.ldTitle.GetString("")
+																				 + diffToString(OpenTaiko.stageSongSelect.nChoosenSongDifficulty[0]) : "";
+
+			// Byte count must be used instead of String.Length.
+			// The byte count is what Discord is concerned with. Some chars are greater than one byte.
+			if (Encoding.UTF8.GetBytes(details).Length > 128) {
+				byte[] details_byte = Encoding.UTF8.GetBytes(details);
+				Array.Resize(ref details_byte, 128);
+				details = Encoding.UTF8.GetString(details_byte);
+			}
+
+			var difficultyName = OpenTaiko.DifficultyNumberToEnum(OpenTaiko.stageSongSelect.nChoosenSongDifficulty[0]).ToString();
+
+			OpenTaiko.DiscordClient?.SetPresence(new RichPresence() {
+				Details = details,
+				State = "Playing" + (OpenTaiko.ConfigIni.bAutoPlay[0] == true ? " (Auto)" : ""),
+				Timestamps = new Timestamps(DateTime.UtcNow, DateTime.UtcNow.AddMilliseconds(OpenTaiko.TJA.TjaTimeToGameTime(OpenTaiko.TJA.listChip[OpenTaiko.TJA.listChip.Count - 1].n発声時刻ms))),
+				Assets = new Assets() {
+					SmallImageKey = OpenTaiko.ConfigIni.SendDiscordPlayingInformation ? difficultyName.ToLower() : "",
+					SmallImageText = OpenTaiko.ConfigIni.SendDiscordPlayingInformation ? String.Format("COURSE:{0} ({1})", difficultyName, OpenTaiko.stageSongSelect.nChoosenSongDifficulty[0]) : "",
+					LargeImageKey = OpenTaiko.LargeImageKey,
+					LargeImageText = OpenTaiko.LargeImageText,
+				}
+			});
+		}
+
+		if (!b演奏状態 && iPrevTopChipMax <= 0)
+			return; // no needs to reset
+
+		#region [reset accumulated chip state]
+		this.bフィルイン中 = false;
+		this.n待機中の大音符の座標 = 0;
+
+		this.actLaneTaiko.ResetPlayStates();
+
+		for (int i = 0; i < 5; i++)
+			PuchiChara.ChangeBPM(CTja.TjaDurationToGameDuration(60.0 / OpenTaiko.stageGameScreen.actPlayInfo.dbBPM[i]));
+
+		//dbUnit = Math.Ceiling( dbUnit * 1000.0 );
+		//dbUnit = dbUnit / 1000.0;
+
+		//if (this.actChara.ctキャラクターアクションタイマ != null) this.actChara.ctキャラクターアクションタイマ = new CCounter();
+
+		//this.actDancer.ct通常モーション = new CCounter( 0, this.actDancer.arモーション番号_通常.Length - 1, ( dbUnit * 4.0) / this.actDancer.arモーション番号_通常.Length, CSound管理.rc演奏用タイマ );
+		//this.actDancer.ctモブ = new CCounter( 1.0, 16.0, ((60.0 / CDTXMania.stage演奏ドラム画面.actPlayInfo.dbBPM / 16.0 )), CSound管理.rc演奏用タイマ );
+
+
+		this.ShownLyric2 = 0;
+		#endregion
+	}
+
 	public override void DeActivate() {
 		this.ct手つなぎ = null;
 
@@ -366,31 +359,31 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 				base.ePhaseID = CStage.EPhase.Game_STAGE_FAILED;
 			}
 
-			bool BGA_Hidden = OpenTaiko.ConfigIni.bEnableAVI && OpenTaiko.TJA.listVD.Count > 0 && ShowVideo;
+			bool BGA_Shown = OpenTaiko.ConfigIni.bEnableAVI && OpenTaiko.TJA.listVD.Count > 0 && ShowVideo;
 
-			// (????)
-			if (!String.IsNullOrEmpty(OpenTaiko.TJA.strBGIMAGE_PATH) || (OpenTaiko.TJA.listVD.Count == 0) || !ShowVideo || !OpenTaiko.ConfigIni.bEnableAVI) //背景動画があったら背景画像を描画しない。
-			{
-				this.t進行描画_背景();
-			}
+			// Layer: background
 
-			if (OpenTaiko.ConfigIni.bEnableAVI && OpenTaiko.TJA.listVD.Count > 0 && ShowVideo && !OpenTaiko.ConfigIni.bTokkunMode) {
-				this.t進行描画_AVI();
+			if (BGA_Shown && !OpenTaiko.ConfigIni.bTokkunMode && this.t進行描画_AVI()) {
+				// BGMOVIE & #BGAON
+			} else if (!OpenTaiko.ConfigIni.bTokkunMode && this.t進行描画_背景()) {
+				// BGIMAGE
 			} else if (OpenTaiko.ConfigIni.bEnableBGA) {
-				if (OpenTaiko.ConfigIni.bTokkunMode) actTokkun.On進行描画_背景();
-				else actBackground.Draw();
+				if (OpenTaiko.ConfigIni.bTokkunMode)
+					actTokkun.On進行描画_背景();
+				else
+					actBackground.Draw();
 			}
 
-			if (!BGA_Hidden && !OpenTaiko.ConfigIni.bTokkunMode) {
+			// Layer: below-character background elements
+			if (!BGA_Shown && !OpenTaiko.ConfigIni.bTokkunMode) {
 				actRollChara.Draw();
+				if (!this.isMultiPlay) {
+					if (OpenTaiko.ConfigIni.ShowDancer)
+						actDancer.Draw();
+					if (OpenTaiko.ConfigIni.ShowFooter)
+						this.actFooter.Draw();
+				}
 			}
-
-			if (!BGA_Hidden && !bDoublePlay && OpenTaiko.ConfigIni.ShowDancer && !OpenTaiko.ConfigIni.bTokkunMode) {
-				actDancer.Draw();
-			}
-
-			if (!BGA_Hidden && !bDoublePlay && OpenTaiko.ConfigIni.ShowFooter && !OpenTaiko.ConfigIni.bTokkunMode)
-				this.actFooter.Draw();
 
 			//this.t進行描画_グラフ();   // #24074 2011.01.23 add ikanick
 
@@ -398,11 +391,14 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 			//this.t進行描画_DANGER();
 			//this.t進行描画_判定ライン();
 
+			// 1/2-player mode character
 			if (OpenTaiko.ConfigIni.ShowChara && OpenTaiko.ConfigIni.nPlayerCount <= 2) {
 				this.actChara.Draw();
 			}
 
-			if (!BGA_Hidden && OpenTaiko.ConfigIni.ShowMob && !OpenTaiko.ConfigIni.bTokkunMode)
+			// Layer: above-character background elements
+
+			if (!BGA_Shown && !OpenTaiko.ConfigIni.bTokkunMode && OpenTaiko.ConfigIni.ShowMob)
 				this.actMob.Draw();
 
 			if (OpenTaiko.ConfigIni.eGameMode != EGame.Off)
@@ -411,15 +407,17 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 			this.t進行描画_譜面スクロール速度();
 			this.t進行描画_チップアニメ();
 
+			// Layer: note lane + below-note foreground elements
+
 			this.actLaneTaiko.Draw();
 
-			if (OpenTaiko.ConfigIni.ShowRunner && !OpenTaiko.ConfigIni.bAIBattleMode && OpenTaiko.ConfigIni.nPlayerCount <= 2)
+			if (OpenTaiko.ConfigIni.ShowRunner && !OpenTaiko.ConfigIni.bAIBattleMode && !this.isMultiPlay)
 				this.actRunner.Draw();
 
 			//this.t進行描画_レーン();
 			//this.t進行描画_レーンフラッシュD();
 
-			if ((OpenTaiko.ConfigIni.eClipDispType == EClipDispType.WindowOnly || OpenTaiko.ConfigIni.eClipDispType == EClipDispType.Both) && OpenTaiko.ConfigIni.nPlayerCount == 1)
+			if (BGA_Shown && !OpenTaiko.ConfigIni.bTokkunMode && !this.isMultiPlay)
 				this.actAVI.t窓表示();
 
 			if (!OpenTaiko.ConfigIni.bNoInfo && !OpenTaiko.ConfigIni.bTokkunMode)
@@ -431,6 +429,7 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 
 			this.actDan.Draw();
 
+			// Layer: notes & bar lines
 			for (int i = 0; i < OpenTaiko.ConfigIni.nPlayerCount; i++) {
 				// bIsFinishedPlaying = this.t進行描画_チップ(E楽器パート.DRUMS, i);
 				bool btmp = this.t進行描画_チップ(EInstrumentPad.Drums, i);
@@ -442,9 +441,9 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 					ifp[i] = true;
 				}
 #endif
-
-				this.t進行描画_チップ_連打(EInstrumentPad.Drums, i);
 			}
+
+			// Layer: above-note elements
 
 			this.actMtaiko.Draw();
 
@@ -462,10 +461,12 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 			if (!OpenTaiko.ConfigIni.bNoInfo && !OpenTaiko.ConfigIni.bTokkunMode)
 				this.t進行描画_スコア();
 
+			// 3+-player mode character
 			if (OpenTaiko.ConfigIni.ShowChara && OpenTaiko.ConfigIni.nPlayerCount > 2) {
 				this.actChara.Draw();
 			}
 
+			// note effects
 			this.Rainbow.Draw();
 			this.FireWorks.Draw();
 			this.actChipEffects.Draw();
@@ -475,17 +476,22 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 			if (!OpenTaiko.ConfigIni.bNoInfo)
 				this.t進行描画_パネル文字列();
 
+			// dialogue balloons
+
 			this.actComboBalloon.Draw();
 
 			for (int i = 0; i < OpenTaiko.ConfigIni.nPlayerCount; i++) {
 				this.actRoll.On進行描画(this.nCurrentRollCount[i], i);
 			}
 
+			// infos
 
 			if (!OpenTaiko.ConfigIni.bNoInfo)
 				this.t進行描画_判定文字列1_通常位置指定の場合();
 
 			this.t進行描画_演奏情報();
+
+			// LYRIC[S/FILE]: & #LYRIC
 
 			if (OpenTaiko.TJA.listLyric2.Count > ShownLyric2 && OpenTaiko.TJA.listLyric2[ShownLyric2].Time < (long)OpenTaiko.TJA.GameTimeToTjaTime(SoundManager.PlayTimer.NowTimeMs)) {
 				this.actPanel.t歌詞テクスチャを生成する(OpenTaiko.TJA.listLyric2[ShownLyric2++].TextTex);
@@ -506,10 +512,16 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 
 			this.ScoreRank.Draw();
 
+			// Layer: Interactive elements
+
 			if (OpenTaiko.ConfigIni.bTokkunMode) {
 				actTokkun.Draw();
 			}
 
+			// handle retry states here
+			this.actPauseMenu.Draw();
+
+			// Layer: Gameplay complete animation and fading out
 
 			bIsFinishedEndAnime = this.actEnd.Draw() == 1 ? true : false;
 			bIsFinishedFadeout = this.t進行描画_フェードイン_アウト();
@@ -518,8 +530,6 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 			for (int i = 0; i < OpenTaiko.ConfigIni.nPlayerCount; i++) {
 				if (!ifp[i]) bIsFinishedPlaying = false;
 			}
-
-			this.actPauseMenu.Draw();
 
 			//演奏終了→演出表示→フェードアウト
 			if (bIsFinishedPlaying && base.ePhaseID == CStage.EPhase.Common_NORMAL) {
@@ -540,7 +550,6 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 						if (HGaugeMethods.UNSAFE_IsRainbow(i)) {
 							if (OpenTaiko.Skin.Characters_10Combo_Maxed_Ptn[Character] != 0) {
 								if (HGaugeMethods.UNSAFE_IsRainbow(i)) {
-									double dbUnit = (((60.0 / (OpenTaiko.stageGameScreen.actPlayInfo.dbBPM[i]))));
 									this.actChara.ChangeAnime(i, CActImplCharacter.Anime.Combo10_Max, true);
 								}
 							}
@@ -726,15 +735,12 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 		}
 
 
-		if (pChip == null) {
+		if (!(pChip != null && NotesManager.IsHittableNote(pChip) && !NotesManager.IsRollEnd(pChip))) {
 			return false;
 		}
-
-		if (NotesManager.IsGenericRoll(pChip) && !NotesManager.IsRollEnd(pChip)) {
+		if (NotesManager.IsGenericRoll(pChip)) {
 			this.tチップのヒット処理(nHitTime, pChip, EInstrumentPad.Taiko, true, nInput, nPlayer);
 			return true;
-		} else if (!NotesManager.IsHittableNote(pChip)) {
-			return false;
 		}
 
 		ENoteJudge e判定 = this.e指定時刻からChipのJUDGEを返す(nHitTime, pChip, nPlayer);
@@ -1116,8 +1122,8 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 				bool _isPinkKonga = NotesManager.IsSwapNote(chipNoHit, _gt);
 
 
-				if (this.bCurrentlyDrumRoll[nUsePlayer]) {
-					chipNoHit = this.chip現在処理中の連打チップ[nUsePlayer];
+				if (this.chip現在処理中の連打チップ[nUsePlayer].Count > 0) {
+					chipNoHit = this.chip現在処理中の連打チップ[nUsePlayer][0];
 					e判定 = ENoteJudge.Perfect;
 				}
 
@@ -1317,7 +1323,7 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 				//-----------------------------
 				int pad = nPad; // 以下、nPad の代わりに pad を用いる。（成りすまし用）
 								// BAD or TIGHT 時の処理。
-				if (OpenTaiko.ConfigIni.bTight && !bCurrentlyDrumRoll[nUsePlayer]) // 18/8/13 - 連打時にこれが発動すると困る!!! (AioiLight)
+				if (OpenTaiko.ConfigIni.bTight && !this.bCurrentlyDrumRoll[nUsePlayer]) // 18/8/13 - 連打時にこれが発動すると困る!!! (AioiLight)
 					this.tチップのヒット処理_BadならびにTight時のMiss(chipNoHit.nBranch, EInstrumentPad.Drums, 0, EInstrumentPad.Taiko);
 				//-----------------------------
 				#endregion
@@ -1393,7 +1399,7 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 				}
 
 				int x = pChip.nHorizontalChipDistance;
-				int y = NoteOriginY[nPlayer];// + ((int)(pChip.nコース) * 100)
+				int y = GetNoteOriginY(nPlayer) + pChip.nVerticalChipDistance; // either untouched (0/5) or unused (other) for #DIRECTION
 
 				int xTemp = 0;
 				int yTemp = 0;
@@ -1405,41 +1411,41 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 				}
 				switch (pChip.nScrollDirection) {
 					case 0:
-						x += (NoteOriginX[nPlayer]);
+						x += (GetNoteOriginX(nPlayer));
 						break;
 					case 1:
-						x = (NoteOriginX[nPlayer]);
-						y = NoteOriginY[nPlayer] - xTemp;
+						x = (GetNoteOriginX(nPlayer));
+						y = GetNoteOriginY(nPlayer) - xTemp;
 						break;
 					case 2:
-						x = (NoteOriginX[nPlayer] + 3);
-						y = NoteOriginY[nPlayer] + xTemp;
+						x = (GetNoteOriginX(nPlayer) + 3);
+						y = GetNoteOriginY(nPlayer) + xTemp;
 						break;
 					case 3:
-						x += (NoteOriginX[nPlayer]);
-						y = NoteOriginY[nPlayer] - xTemp;
+						x += (GetNoteOriginX(nPlayer));
+						y = GetNoteOriginY(nPlayer) - xTemp;
 						break;
 					case 4:
-						x += (NoteOriginX[nPlayer]);
-						y = NoteOriginY[nPlayer] + xTemp;
+						x += (GetNoteOriginX(nPlayer));
+						y = GetNoteOriginY(nPlayer) + xTemp;
 						break;
 					case 5:
-						x = (NoteOriginX[nPlayer] + 10) - xTemp;
+						x = (GetNoteOriginX(nPlayer) + 10) - xTemp;
 						break;
 					case 6:
-						x = (NoteOriginX[nPlayer]) - xTemp;
-						y = NoteOriginY[nPlayer] - xTemp;
+						x = (GetNoteOriginX(nPlayer)) - xTemp;
+						y = GetNoteOriginY(nPlayer) - xTemp;
 						break;
 					case 7:
-						x = (NoteOriginX[nPlayer]) - xTemp;
-						y = NoteOriginY[nPlayer] + xTemp;
+						x = (GetNoteOriginX(nPlayer)) - xTemp;
+						y = GetNoteOriginY(nPlayer) + xTemp;
 						break;
 				}
 				#endregion
 
 				#region[ 両手待ち時 ]
 				if (pChip.eNoteState == ENoteState.Wait) {
-					x = (NoteOriginX[nPlayer]);
+					x = (GetNoteOriginX(nPlayer));
 				}
 				#endregion
 
@@ -1451,19 +1457,6 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 
 				long __dbt = (long)tja.GameTimeToTjaTime(SoundManager.PlayTimer.NowTimeMs);
 				long time = pChip.n発声時刻ms - __dbt;
-
-				if (pChip.dbSCROLL_Y != 0.0) {
-					var dbSCROLL = pChip.eScrollMode == EScrollMode.BMScroll ? 1.0 : pChip.dbSCROLL;
-
-					y = NoteOriginY[nPlayer];
-
-
-					double _scrollSpeed = pChip.dbSCROLL_Y * (this.actScrollSpeed.dbConfigScrollSpeed[nPlayer] + 1.0) / 10.0;
-					float play_bpm_time = this.GetNowPBMTime(dTX, 0);
-					double th16DBeat = pChip.fBMSCROLLTime - play_bpm_time;
-
-					y += NotesManager.GetNoteY(time, th16DBeat, pChip.dbBPM, _scrollSpeed, pChip.eScrollMode);
-				}
 
 				if (bSplitLane[nPlayer] || OpenTaiko.Tx.Puchichara[PuchiChara.tGetPuchiCharaIndexByName(OpenTaiko.GetActualPlayer(nPlayer))].effect.SplitLane) {
 					if (NotesManager.IsDonNote(pChip)) {
@@ -1633,9 +1626,6 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 				break;
 		}
 
-		int nノート座標 = pChip.nHorizontalChipDistance;
-		int nノート末端座標 = pChip.nNoteTipDistance_X;
-		int nノート末端座標_Y = pChip.nNoteTipDistance_Y;
 		int n先頭発声位置 = 0;
 
 		EGameType _gt = OpenTaiko.ConfigIni.nGameType[OpenTaiko.GetActualPlayer(nPlayer)];
@@ -1661,35 +1651,20 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 				else
 					pChip.bShow = true;
 
-				CChip cChip = null;
-				if (pChip.nノーツ移動開始時刻ms != 0) // n先頭発声位置 value is only used when this condition is met
-				{
-					cChip = OpenTaiko.stageGameScreen.r指定時刻に一番近い連打Chip_ヒット未済問わず不可視考慮(pChip.n発声時刻ms, 0x10 + pChip.n連打音符State, nPlayer);
-					if (cChip != null) {
-						n先頭発声位置 = cChip.n発声時刻ms;
-					}
-				}
+				if (pChip.nノーツ移動開始時刻ms != 0)
+					n先頭発声位置 = pChip.start.n発声時刻ms;
 			}
 
-			int x = NoteOriginX[nPlayer] + nノート座標;
-			int x末端 = NoteOriginX[nPlayer] + nノート末端座標;
-			int y末端 = NoteOriginY[nPlayer] + nノート末端座標_Y;
-			int y = NoteOriginY[nPlayer];
-
-			if (pChip.dbSCROLL_Y != 0.0) {
-				double _scrollSpeed = pChip.dbSCROLL_Y * (this.actScrollSpeed.dbConfigScrollSpeed[nPlayer] + 1.0) / 10.0;
-				long __dbt = nowTime;
-				long time = pChip.n発声時刻ms - __dbt;
-				float play_bpm_time = this.GetNowPBMTime(dTX, 0);
-				double th16DBeat = pChip.fBMSCROLLTime - play_bpm_time;
-				y += NotesManager.GetNoteY(time, th16DBeat, pChip.dbBPM, _scrollSpeed, pChip.eScrollMode);
-			}
+			int x = GetNoteOriginX(nPlayer) + pChip.nHorizontalChipDistance;
+			int y = GetNoteOriginY(nPlayer) + pChip.nVerticalChipDistance;
+			int x末端 = GetNoteOriginX(nPlayer) + pChip.end.nHorizontalChipDistance;
+			int y末端 = GetNoteOriginY(nPlayer) + pChip.end.nVerticalChipDistance;
 
 			if (NotesManager.IsGenericBalloon(pChip)) {
-				if (nowTime >= pChip.n発声時刻ms && nowTime < pChip.nNoteEndTimems) {
-					x = NoteOriginX[nPlayer];
-					y = NoteOriginY[nPlayer];
-				} else if (nowTime >= pChip.nNoteEndTimems) {
+				if (nowTime >= pChip.n発声時刻ms && nowTime < pChip.end.n発声時刻ms) {
+					x = GetNoteOriginX(nPlayer);
+					y = GetNoteOriginY(nPlayer);
+				} else if (nowTime >= pChip.end.n発声時刻ms) {
 					x = x末端;
 					y = y末端;
 				}
@@ -1841,18 +1816,18 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 						if (OpenTaiko.Tx.Notes[(int)_gt] != null)
 							OpenTaiko.Tx.Notes[(int)_gt].vcScaleRatio.X = 1.0f;
 						int n = 0;
-						switch (pChip.n連打音符State) {
-							case 5:
+						switch (pChip.start.nChannelNo) {
+							case 0x15:
 								n = 910;
 								break;
-							case 6:
+							case 0x16:
 								n = 1300;
 								break;
 							default:
 								n = 910;
 								break;
 						}
-						if (pChip.n連打音符State != 7 && pChip.n連打音符State != 9 && pChip.n連打音符State != 13) {
+						if (!NotesManager.IsGenericBalloon(pChip.start)) {
 							//if( CDTXMania.ConfigIni.eSTEALTH != Eステルスモード.DORON )
 							//    CDTXMania.Tx.Notes.t2D描画( CDTXMania.app.Device, x, y, new Rectangle( n, num9, 130, 130 ) );//大音符:1170
 							OpenTaiko.Tx.SENotes[(int)_gt]?.t2D描画(x + 56, y + nSenotesY, new Rectangle(_58_cut, 9 * _size[1], _78_cut, _size[1]));
@@ -1862,7 +1837,7 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 				}
 			}
 
-			if (pChip.n発声時刻ms < nowTime && pChip.nNoteEndTimems > nowTime) {
+			if (pChip.n発声時刻ms < nowTime && pChip.end.n発声時刻ms > nowTime) {
 				var puchichara = OpenTaiko.Tx.Puchichara[PuchiChara.tGetPuchiCharaIndexByName(OpenTaiko.GetActualPlayer(nPlayer))];
 
 				//時間内でかつ0x9Aじゃないならならヒット処理
@@ -1879,7 +1854,7 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 	/// Detect and hide screen-obscuring rolls when any tips are out of screen
 	private void HideObscuringRoll(int iPlayer, CChip pChip, int xHead, int yHead, int xEnd, int yEnd, bool isBodyXInScreen, long nowTime) {
 		// display judging rolls
-		if (nowTime >= pChip.n発声時刻ms && nowTime <= pChip.nNoteEndTimems) {
+		if (nowTime >= pChip.n発声時刻ms && nowTime <= pChip.end.n発声時刻ms) {
 			pChip.bShowRoll = true;
 			return;
 		}
@@ -1904,14 +1879,14 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 		double th16DBeat = -4 * pChip.dbBPM / 60;
 		int dxHead = NotesManager.GetNoteX(-1000, th16DBeat, pChip.dbBPM, pChip.dbSCROLL, pChip.eScrollMode);
 		int dyHead = NotesManager.GetNoteY(-1000, th16DBeat, pChip.dbBPM, pChip.dbSCROLL_Y, pChip.eScrollMode);
-		int dxEnd = NotesManager.GetNoteX(-1000, th16DBeat, pChip.dbBPM_end, pChip.dbSCROLL_end, pChip.eScrollMode_end);
-		int dyEnd = NotesManager.GetNoteY(-1000, th16DBeat, pChip.dbBPM_end, pChip.dbSCROLL_Y_end, pChip.eScrollMode_end);
+		int dxEnd = NotesManager.GetNoteX(-1000, th16DBeat, pChip.end.dbBPM, pChip.end.dbSCROLL, pChip.end.eScrollMode);
+		int dyEnd = NotesManager.GetNoteY(-1000, th16DBeat, pChip.end.dbBPM, pChip.end.dbSCROLL_Y, pChip.end.eScrollMode);
 
 		// get move speed near the judgement mark
 
 		var head = new Vector2(xHead, yHead);
 		var end = new Vector2(xEnd, yEnd);
-		var origin = new Vector2(this.NoteOriginX[iPlayer], this.NoteOriginY[iPlayer]);
+		var origin = new Vector2(this.GetNoteOriginX(iPlayer), this.GetNoteOriginY(iPlayer));
 		float pos = NearestLineSegRelPos(head, end, origin);
 
 		Vector2 dr = Vector2.Lerp(new(dxHead, dyHead), new(dxEnd, dyEnd), pos);
@@ -1949,19 +1924,8 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 		CTja tja = OpenTaiko.GetTJA(nPlayer)!;
 		//int n小節番号plus1 = pChip.n発声位置 / 384;
 		//int n小節番号plus1 = this.actPlayInfo.NowMeasure[nPlayer];
-		int x = NoteOriginX[nPlayer] + pChip.nHorizontalChipDistance;
-		int y = NoteOriginY[nPlayer];
-
-		if (pChip.dbSCROLL_Y != 0.0) {
-			double _scrollSpeed = pChip.dbSCROLL_Y * (this.actScrollSpeed.dbConfigScrollSpeed[nPlayer] + 1.0) / 10.0;
-			long __dbt = (long)tja.GameTimeToTjaTime(SoundManager.PlayTimer.NowTimeMs);
-			long msDTime = pChip.n発声時刻ms - __dbt;
-			float play_bpm_time = this.GetNowPBMTime(dTX, 0);
-			double th16DBeat = pChip.fBMSCROLLTime - play_bpm_time;
-			y += NotesManager.GetNoteY(msDTime, th16DBeat, pChip.dbBPM, _scrollSpeed, pChip.eScrollMode);
-
-			//y += (int)(((pChip.n発声時刻ms - (CSound管理.rc演奏用タイマ.n現在時刻 * (((double)TJAPlayer3.ConfigIni.n演奏速度) / 20.0))) * pChip.dbBPM * pChip.dbSCROLL_Y * (this.act譜面スクロール速度.db現在の譜面スクロール速度[nPlayer] + 1.5)) / 628.7);
-		}
+		int x = GetNoteOriginX(nPlayer) + pChip.nHorizontalChipDistance;
+		int y = GetNoteOriginY(nPlayer) + pChip.nVerticalChipDistance;
 
 		if ((pChip.bVisible && !pChip.bHideBarLine) && (OpenTaiko.Tx.Bar != null)) {
 			if (x >= 0 && x <= GameWindowSize.Width) {
@@ -1987,31 +1951,44 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 
 		for (int i = 0; i < OpenTaiko.ConfigIni.nPlayerCount; i++) {
 			CTja tja = OpenTaiko.GetTJA(i)!;
-			var chkChip = this.chip現在処理中の連打チップ[i];
-			if (chkChip != null) {
+			double msBarRollProgress = 0;
+			for (int iChip = this.chip現在処理中の連打チップ[i].Count; iChip-- > 0;) {
+				var chkChip = this.chip現在処理中の連打チップ[i][iChip];
 				long nowTime = (long)tja.GameTimeToTjaTime(SoundManager.PlayTimer.NowTimeMs);
 				//int n = this.chip現在処理中の連打チップ[i].nチャンネル番号;
-				if ((NotesManager.IsGenericBalloon(chkChip) || NotesManager.IsKusudama(chkChip)) && (this.bCurrentlyDrumRoll[i] == true)) {
-					//if (this.chip現在処理中の連打チップ.n発声時刻ms <= (int)CSound管理.rc演奏用タイマ.n現在時刻ms && this.chip現在処理中の連打チップ.nノーツ終了時刻ms >= (int)CSound管理.rc演奏用タイマ.n現在時刻ms)
-					if (chkChip.n発声時刻ms <= (int)nowTime
-						&& chkChip.nNoteEndTimems + 500 >= (int)nowTime) {
-						var balloon = NotesManager.IsKusudama(chkChip) ? nCurrentKusudamaCount : chkChip.nBalloon;
-						if (!NotesManager.IsFuzeRoll(chkChip)) chkChip.bShow = false;
-						this.actBalloon.On進行描画(
-							balloon,
-							this.nBalloonRemaining[i],
-							i,
-							NotesManager.IsFuzeRoll(chkChip)
-								? CActImplBalloon.EBalloonType.FUSEROLL
-								: NotesManager.IsKusudama(chkChip)
-									? CActImplBalloon.EBalloonType.KUSUDAMA
-									: CActImplBalloon.EBalloonType.BALLOON
-						);
-					} else {
-						this.nCurrentRollCount[i] = 0;
-					}
-
+				if (!this.bPAUSE && !this.isRewinding && !chkChip.bProcessed) {
+					this.ProcessRollHeadEffects(i, chkChip);
 				}
+				if (!NotesManager.IsGenericBalloon(chkChip)) {
+					if (chkChip.end.bVisible && chkChip.end.n発声時刻ms >= (int)nowTime)
+						msBarRollProgress += (int)nowTime - chkChip.n発声時刻ms;
+					continue;
+				}
+				if (!(chkChip.nRollCount > 0 || NotesManager.IsKusudama(chkChip))) {
+					continue;
+				}
+				//if (this.chip現在処理中の連打チップ.n発声時刻ms <= (int)CSound管理.rc演奏用タイマ.n現在時刻ms && this.chip現在処理中の連打チップ.nノーツ終了時刻ms >= (int)CSound管理.rc演奏用タイマ.n現在時刻ms)
+				if (chkChip.n発声時刻ms <= (int)nowTime
+					&& chkChip.end.n発声時刻ms + 500 >= (int)nowTime
+					) {
+					var balloon = NotesManager.IsKusudama(chkChip) ? nCurrentKusudamaCount : chkChip.nBalloon;
+					var rollCount = NotesManager.IsKusudama(chkChip) ? nCurrentKusudamaRollCount : chkChip.nRollCount;
+					if (!this.bPAUSE && !this.isRewinding && !NotesManager.IsFuzeRoll(chkChip))
+						chkChip.bShow = false;
+					this.actBalloon.On進行描画(
+						balloon,
+						balloon - rollCount,
+						i,
+						NotesManager.IsFuzeRoll(chkChip) ? CActImplBalloon.EBalloonType.FUSEROLL
+							: NotesManager.IsKusudama(chkChip) ? CActImplBalloon.EBalloonType.KUSUDAMA
+							: CActImplBalloon.EBalloonType.BALLOON
+					);
+				}
+			}
+			if (msBarRollProgress != this.msCurrentBarRollProgress[i]) {
+				this.msCurrentBarRollProgress[i] = msBarRollProgress;
+				if (i == 0)
+					this.actDan.Update();
 			}
 		}
 		#region [ Treat big notes hit with a single hand ]
@@ -2057,7 +2034,7 @@ internal class CStage演奏ドラム画面 : CStage演奏画面共通 {
 				SoundManager.PlayTimer.Pause();
 				OpenTaiko.Timer.Pause();
 				OpenTaiko.TJA.t全チップの再生一時停止();
-				this.actAVI.tPauseControl();
+				this.actAVI.Pause();
 
 				this.bPAUSE = true;
 				this.actPauseMenu.tActivatePopupMenu(0);
