@@ -3,6 +3,7 @@
 ## [0.6.0.88] - 2025-08-12 (Beta)
 
 - [i18n] Add Ch V & VI Nameplates & Unlockables Russian & Chinese Text
+- [i18n] Add Ch V & VI Nameplates & Unlockables Russian & Chinese Text
 
 ## [0.6.0.87] - 2025-08-09 (Beta)
 
