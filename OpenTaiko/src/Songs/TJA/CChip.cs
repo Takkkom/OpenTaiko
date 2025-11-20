@@ -21,11 +21,13 @@ internal class CChip : IComparable<CChip>, ICloneable {
 	public double dbSCROLL;
 	public double dbSCROLL_Y;
 	public ECourse nBranch;
+	public int idxBranchSection;
 	public int nSenote;
 	public int nState;
 	public int nRollCount;
 	public int nBalloon;
-	public int nProcessTime;
+	public double msStoredHit = double.NegativeInfinity; // first hit of multi-hit notes, or last attempted autoplay hit, or last auto roll hit for rolls
+	public EPad padStoredHit = EPad.Unknown;
 	public int nScrollDirection;
 	public ENoteState eNoteState;
 	public int nChannelNo;
@@ -41,6 +43,7 @@ internal class CChip : IComparable<CChip>, ICloneable {
 	public double nBranchCondition1_Professional;
 	public double nBranchCondition2_Master;
 	public EBranchConditionType eBranchCondition;
+	public bool[] hasLevelHold = []; // [iBranch]
 
 	public double db発声位置;  // 発声時刻を格納していた変数のうちの１つをfloat型からdouble型に変更。(kairera0467)
 	public double fBMSCROLLTime;
@@ -55,7 +58,6 @@ internal class CChip : IComparable<CChip>, ICloneable {
 	public int nLag;                // 2011.2.1 yyagi
 	public double db発声時刻;
 	public double dbProcess_Time;
-	public int nPlayerSide;
 	public bool bGOGOTIME = false; //2018.03.11 k1airera0467 ゴーゴータイム内のチップであるか
 	public int nListPosition;
 	public bool IsFixedSENote;
@@ -111,7 +113,7 @@ internal class CChip : IComparable<CChip>, ICloneable {
 
 	public int intFrame;
 
-	public EGameType eGameType;
+	public EGameType? eGameType;
 	//
 
 
@@ -139,6 +141,24 @@ internal class CChip : IComparable<CChip>, ICloneable {
 		this.RollDelay = null;
 		this.RollEffectLevel = 0;
 	}
+
+	public static void ForEachTargetBranch(bool isEndedBranching, ECourse branch, Action<ECourse> action) {
+		// IsEndedBranchingがfalseで1回
+		// trueで3回だよ3回
+		if (!isEndedBranching) {
+			action(branch);
+		} else {
+			for (ECourse b = ECourse.eNormal; b <= ECourse.eMaster; ++b) {
+				action(b);
+			}
+		}
+	}
+
+	public void ForEachTargetBranch(Action<ECourse> action)
+		=> ForEachTargetBranch(this.IsEndedBranching, this.nBranch, action);
+
+	public bool IsForBranch(ECourse branch)
+		=> this.IsEndedBranching || this.nBranch == branch;
 
 	public CChip() {
 		this.nHorizontalChipDistance = 0;
@@ -173,6 +193,9 @@ internal class CChip : IComparable<CChip>, ICloneable {
 		this.dbSCROLL = 1.0;
 		this.dbSCROLL_Y = 0.0f;
 	}
+
+	public static implicit operator NotesManager.ENoteType(CChip? chip) => NotesManager.GetNoteType(chip);
+
 	public override string ToString() {
 
 		//2016.10.07 kairera0467 近日中に再編成予定
